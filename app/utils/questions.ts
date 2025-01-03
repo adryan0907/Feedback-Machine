@@ -33,7 +33,7 @@ export const questions: Question[] = [
     options: ["Very satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very dissatisfied"]
   },
   {
-    question: "How well does the university promote diversity and inclusion?",
+    question: "How well does the university promote diversity and inclusion??",
     options: ["Very well", "Adequately", "Somewhat", "Not enough", "Poorly"]
   }
 ]

@@ -1,42 +1,67 @@
-'use client'
+import React, { useState } from 'react';
+import PixelGrid from '../components/PixelGrid';
+import ColorPalette from '../components/ColorPalette';
+import { Button } from "@/components/ui/button";
 
-import React, { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+const COLORS = [
+  '#0EA5E9', // Ocean Blue
+  '#D946EF', // Magenta Pink
+  '#F97316', // Bright Orange
+  '#9b87f5', // Primary Purple
+  '#000000', // Pure Black
+  '#8B5CF6', // Vivid Purple
+  '#ea384c', // Red
+  '#FFFFFF', // Pure White
+];
 
-interface FeedbackFormProps {
-  onSubmit: (feedback: string) => void
-}
+const Index = () => {
+  const [pixels, setPixels] = useState<string[]>(Array(1024).fill('#FFFFFF'));
+  const [activeColor, setActiveColor] = useState(COLORS[0]);
+  const [showFeedback, setShowFeedback] = useState(false);
 
-export function FeedbackForm({ onSubmit }: FeedbackFormProps) {
-  const [feedback, setFeedback] = useState('')
+  const handlePixelClick = (index: number) => {
+    const newPixels = [...pixels];
+    newPixels[index] = activeColor;
+    setPixels(newPixels);
+  };
 
-  const handleSubmit = () => {
-    onSubmit(feedback)
-  }
+  // const handleFeedbackSubmit = (feedback: string) => {
+  //   console.log('Feedback submitted:', feedback);
+  //   toast.success('Thank you for your feedback!');
+  //   setShowFeedback(false);
+  // };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-center">Final Thoughts on Your Campus Experience</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-center mb-4">Any additional comments about your university experience?</p>
-        <Textarea
-          className="w-full mb-4"
-          value={feedback}
-          onChange={(e) => setFeedback(e.target.value)}
-          placeholder="Share your thoughts here..."
-        />
-        <Button
-          onClick={handleSubmit}
-          className="w-full"
-        >
-          Submit Feedback
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto space-y-8">
+        <h1 className="text-4xl font-bold text-center text-gray-900">Pixel Art Creator</h1>
+        <div className="flex flex-col items-center gap-8">
+          <PixelGrid
+            pixels={pixels}
+            activeColor={activeColor}
+            onPixelClick={handlePixelClick}
+          />
+          <ColorPalette
+            colors={COLORS}
+            activeColor={activeColor}
+            onColorSelect={setActiveColor}
+          />
+          <Button
+            onClick={() => setShowFeedback(true)}
+            className="mt-8"
+          >
+            Share Your Feedback
+          </Button>
+        </div>
 
+        {/* {showFeedback && (
+          <div className="mt-8">
+            <FeedbackForm onSubmit={handleFeedbackSubmit} />
+          </div>
+        )} */}
+      </div>
+    </div>
+  );
+};
+
+export default Index;

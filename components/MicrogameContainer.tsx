@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 interface MicrogameProps {
   onComplete: (success: boolean) => void
@@ -13,16 +14,14 @@ interface MicrogameProps {
 
 const microgames = [
   {
-    name: 'Color Matching',
+    name: 'Shape Sorter',
     component: ({ onComplete, timeLimit }: MicrogameProps) => {
-      const colors = ['red', 'blue', 'green', 'yellow']
-      const [targetColor, setTargetColor] = useState('')
-      const [options, setOptions] = useState<string[]>([])
+      const shapes = ['circle', 'square', 'triangle', 'star']
+      const [currentShape, setCurrentShape] = useState('')
       const [timeLeft, setTimeLeft] = useState(timeLimit)
 
       useEffect(() => {
-        setTargetColor(colors[Math.floor(Math.random() * colors.length)])
-        setOptions(colors.sort(() => Math.random() - 0.5))
+        setCurrentShape(shapes[Math.floor(Math.random() * shapes.length)])
         const timer = setInterval(() => {
           setTimeLeft((prev) => {
             if (prev <= 0) {
@@ -36,23 +35,74 @@ const microgames = [
         return () => clearInterval(timer)
       }, [onComplete, timeLimit])
 
-      const handleColorClick = (color: string) => {
-        onComplete(color === targetColor)
+      const handleShapeClick = (shape: string) => {
+        onComplete(shape === currentShape)
       }
 
       return (
         <div className="flex flex-col items-center justify-center h-full">
-          <h2 className="text-2xl font-bold mb-4">Match the color: {targetColor}</h2>
+          <h2 className="text-2xl font-bold mb-4">Click the {currentShape}!</h2>
           <div className="grid grid-cols-2 gap-4">
-            {options.map((color) => (
+            {shapes.map((shape) => (
               <motion.button
-                key={color}
+                key={shape}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => handleColorClick(color)}
-                className={`w-24 h-24 rounded-full bg-${color}-500`}
-              />
+                onClick={() => handleShapeClick(shape)}
+                className="w-24 h-24 bg-blue-400 rounded-md flex items-center justify-center text-white text-4xl"
+              >
+                {shape === 'circle' && '●'}
+                {shape === 'square' && '■'}
+                {shape === 'triangle' && '▲'}
+                {shape === 'star' && '★'}
+              </motion.button>
             ))}
+          </div>
+          <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
+        </div>
+      )
+    }
+  },
+  {
+    name: 'Simon Says',
+    component: ({ onComplete, timeLimit }: MicrogameProps) => {
+      const actions = ['Jump', 'Clap', 'Spin', 'Wave']
+      const [currentAction, setCurrentAction] = useState('')
+      const [isSaid, setIsSaid] = useState(false)
+      const [timeLeft, setTimeLeft] = useState(timeLimit)
+
+      useEffect(() => {
+        setCurrentAction(actions[Math.floor(Math.random() * actions.length)])
+        setIsSaid(Math.random() < 0.5)
+        const timer = setInterval(() => {
+          setTimeLeft((prev) => {
+            if (prev <= 0) {
+              clearInterval(timer)
+              onComplete(false)
+              return 0
+            }
+            return prev - 0.1
+          })
+        }, 100)
+        return () => clearInterval(timer)
+      }, [onComplete, timeLimit])
+
+      const handleAction = (doAction: boolean) => {
+        onComplete((isSaid && doAction) || (!isSaid && !doAction))
+      }
+
+      return (
+        <div className="flex flex-col items-center justify-center h-full">
+          <h2 className="text-2xl font-bold mb-4">
+            {isSaid ? 'Simon says:' : ''} {currentAction}!
+          </h2>
+          <div className="flex gap-4">
+            <Button onClick={() => handleAction(true)} className="w-32">
+              Do it!
+            </Button>
+            <Button onClick={() => handleAction(false)} className="w-32">
+              Don't do it!
+            </Button>
           </div>
           <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
         </div>
@@ -64,7 +114,7 @@ const microgames = [
     component: ({ onComplete, timeLimit }: MicrogameProps) => {
       const [clicks, setClicks] = useState(0)
       const [timeLeft, setTimeLeft] = useState(timeLimit)
-      const target = 3
+      const target = 3 // Reduced from 5 to 3
 
       useEffect(() => {
         const timer = setInterval(() => {
@@ -98,112 +148,6 @@ const microgames = [
     }
   },
   {
-    name: 'Memory Match',
-    component: ({ onComplete, timeLimit }: MicrogameProps) => {
-      const [flippedCards, setFlippedCards] = useState<number[]>([])
-      const [matchedPairs, setMatchedPairs] = useState<number[]>([])
-      const [timeLeft, setTimeLeft] = useState(timeLimit)
-      const cards = ['🎓', '📚', '🏫', '🖥️']
-      const shuffledCards = [...cards, ...cards].sort(() => Math.random() - 0.5)
-
-      useEffect(() => {
-        const timer = setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev <= 0) {
-              clearInterval(timer)
-              onComplete(matchedPairs.length === cards.length)
-              return 0
-            }
-            return prev - 0.1
-          })
-        }, 100)
-        return () => clearInterval(timer)
-      }, [matchedPairs.length, onComplete, timeLimit])
-
-      const handleCardClick = (index: number) => {
-        if (flippedCards.length === 2) return
-        setFlippedCards([...flippedCards, index])
-        if (flippedCards.length === 1) {
-          if (shuffledCards[flippedCards[0]] === shuffledCards[index]) {
-            setMatchedPairs([...matchedPairs, flippedCards[0], index])
-          }
-          setTimeout(() => setFlippedCards([]), 1000)
-        }
-      }
-
-      return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <h2 className="text-2xl font-bold mb-4">Match all pairs!</h2>
-          <div className="grid grid-cols-4 gap-2 mb-4">
-            {shuffledCards.map((card, index) => (
-              <motion.button
-                key={index}
-                className={`w-16 h-16 bg-blue-400 rounded-md flex items-center justify-center text-2xl ${
-                  flippedCards.includes(index) || matchedPairs.includes(index) ? 'bg-green-400' : ''
-                }`}
-                onClick={() => handleCardClick(index)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {flippedCards.includes(index) || matchedPairs.includes(index) ? card : '?'}
-              </motion.button>
-            ))}
-          </div>
-          <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
-        </div>
-      )
-    }
-  },
-  {
-    name: 'Word Scramble',
-    component: ({ onComplete, timeLimit }: MicrogameProps) => {
-      const words = ['CAMPUS', 'STUDENT', 'LECTURE', 'LIBRARY', 'RESEARCH']
-      const [currentWord, setCurrentWord] = useState('')
-      const [scrambledWord, setScrambledWord] = useState('')
-      const [userInput, setUserInput] = useState('')
-      const [timeLeft, setTimeLeft] = useState(timeLimit)
-
-      useEffect(() => {
-        const word = words[Math.floor(Math.random() * words.length)]
-        setCurrentWord(word)
-        setScrambledWord(word.split('').sort(() => Math.random() - 0.5).join(''))
-        const timer = setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev <= 0) {
-              clearInterval(timer)
-              onComplete(false)
-              return 0
-            }
-            return prev - 0.1
-          })
-        }, 100)
-        return () => clearInterval(timer)
-      }, [onComplete, timeLimit])
-
-      const handleSubmit = () => {
-        onComplete(userInput.toUpperCase() === currentWord)
-      }
-
-      return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <h2 className="text-2xl font-bold mb-4">Unscramble the word!</h2>
-          <p className="text-3xl font-bold mb-4">{scrambledWord}</p>
-          <input
-            type="text"
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            className="w-full p-2 mb-4 border rounded"
-            placeholder="Enter the unscrambled word"
-          />
-          <Button onClick={handleSubmit} className="w-full">
-            Submit
-          </Button>
-          <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
-        </div>
-      )
-    }
-  },
-  {
     name: 'Obstacle Jump',
     component: ({ onComplete, timeLimit }: MicrogameProps) => {
       const [isJumping, setIsJumping] = useState(false)
@@ -219,24 +163,28 @@ const microgames = [
         }, 500)
 
         const obstacleTimer = setInterval(() => {
-          setObstaclePosition((prev) => {
-            if (prev <= 0) {
-              return 100
-            }
-            return prev - 5
-          })
+          if (!gameOver) {
+            setObstaclePosition((prev) => {
+              if (prev <= 0) {
+                return 100
+              }
+              return prev - 5
+            })
+          }
         }, 50)
 
         const gameTimer = setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev <= 0) {
-              clearInterval(gameTimer)
-              setGameOver(true)
-              onComplete(true)
-              return 0
-            }
-            return prev - 0.1
-          })
+          if (!gameOver) {
+            setTimeLeft((prev) => {
+              if (prev <= 0) {
+                clearInterval(gameTimer)
+                setGameOver(true)
+                onComplete(true)
+                return 0
+              }
+              return prev - 0.1
+            })
+          }
         }, 100)
 
         return () => {
@@ -244,14 +192,14 @@ const microgames = [
           clearInterval(obstacleTimer)
           clearInterval(gameTimer)
         }
-      }, [isJumping, onComplete, timeLimit])
+      }, [isJumping, onComplete, timeLimit, gameOver])
 
       useEffect(() => {
-        if (obstaclePosition < 20 && obstaclePosition > 0 && !isJumping) {
+        if (obstaclePosition < 20 && obstaclePosition > 0 && !isJumping && !gameOver) {
           setGameOver(true)
           onComplete(false)
         }
-      }, [obstaclePosition, isJumping, onComplete])
+      }, [obstaclePosition, isJumping, onComplete, gameOver])
 
       const handleJump = () => {
         if (!isJumping && !gameOver) {
@@ -270,10 +218,10 @@ const microgames = [
             />
             <motion.div
               className="w-8 h-8 bg-red-500 absolute bottom-0"
-              animate={{ x: obstaclePosition + '%' }}
+              style={{ left: `${obstaclePosition}%` }}
             />
           </div>
-          <Button onClick={handleJump} className="mt-4 w-full" disabled={gameOver}>
+          <Button onClick={handleJump} className="mt-4 w-full max-w-xs" disabled={gameOver}>
             Jump
           </Button>
           <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
@@ -366,20 +314,24 @@ interface MicrogameContainerProps {
 }
 
 export function MicrogameContainer({ onGameComplete, playedGames }: MicrogameContainerProps) {
-  const timeLimit = 5; // Set time limit to 5 seconds
+  const timeLimit = 8; // Adjusted time limit to 8 seconds
+
   const [currentGame, setCurrentGame] = useState(0)
 
   useEffect(() => {
     // Find the first unplayed game
     const nextUnplayedGame = microgames.findIndex((_, index) => !playedGames.includes(index))
-    setCurrentGame(nextUnplayedGame !== -1 ? nextUnplayedGame : 0)
+    setCurrentGame(nextUnplayedGame !== -1 ? nextUnplayedGame : Math.floor(Math.random() * microgames.length))
   }, [playedGames])
 
-  const handleGameComplete = (success: boolean) => {
+  const handleGameComplete = useCallback((success: boolean) => {
     onGameComplete(success)
-  }
+  }, [onGameComplete])
 
-  const CurrentGame = microgames[currentGame].component
+  const CurrentGameMemo = useMemo(() => {
+    const CurrentGame = microgames[currentGame].component
+    return <CurrentGame onComplete={handleGameComplete} timeLimit={timeLimit} />
+  }, [currentGame, handleGameComplete, timeLimit])
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -387,10 +339,11 @@ export function MicrogameContainer({ onGameComplete, playedGames }: MicrogameCon
         <CardTitle className="text-center">{microgames[currentGame].name}</CardTitle>
       </CardHeader>
       <CardContent>
-        <CurrentGame onComplete={handleGameComplete} timeLimit={timeLimit} />
+        {CurrentGameMemo}
       </CardContent>
     </Card>
   )
 }
+
 export { microgames }
 

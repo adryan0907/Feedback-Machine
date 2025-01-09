@@ -23,18 +23,6 @@ export const questions: Question[] = [
   {
     question: "What area do you think the university should improve the most?",
     options: ["Teaching quality", "Campus facilities", "Student support services", "Research opportunities", "Career guidance"]
-  },
-  {
-    question: "How would you rate the quality of student housing?",
-    options: ["Excellent", "Good", "Average", "Below Average", "Poor"]
-  },
-  {
-    question: "How satisfied are you with the campus dining options?",
-    options: ["Very satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very dissatisfied"]
-  },
-  {
-    question: "How well does the university promote diversity and inclusion??",
-    options: ["Very well", "Adequately", "Somewhat", "Not enough", "Poorly"]
   }
 ]
 

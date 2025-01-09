@@ -1,11 +1,7 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 
 interface MicrogameProps {
   onComplete: (success: boolean) => void
@@ -14,14 +10,18 @@ interface MicrogameProps {
 
 const microgames = [
   {
-    name: 'Shape Sorter',
+    name: 'Shape Picker',
     component: ({ onComplete, timeLimit }: MicrogameProps) => {
-      const shapes = ['circle', 'square', 'triangle', 'star']
-      const [currentShape, setCurrentShape] = useState('')
       const [timeLeft, setTimeLeft] = useState(timeLimit)
+      const [round, setRound] = useState(0)
+      const shapes = [
+        { type: 'triangle', color: '#FFD700', icon: '▲' },
+        { type: 'square', color: '#FF0000', icon: '■' },
+        { type: 'circle', color: '#800080', icon: '●' }
+      ]
+      const [targetShape, setTargetShape] = useState(shapes[Math.floor(Math.random() * shapes.length)])
 
       useEffect(() => {
-        setCurrentShape(shapes[Math.floor(Math.random() * shapes.length)])
         const timer = setInterval(() => {
           setTimeLeft((prev) => {
             if (prev <= 0) {
@@ -33,88 +33,57 @@ const microgames = [
           })
         }, 100)
         return () => clearInterval(timer)
-      }, [onComplete, timeLimit])
+      }, [onComplete])
 
-      const handleShapeClick = (shape: string) => {
-        onComplete(shape === currentShape)
+      const handleShapeClick = (shape: typeof shapes[0]) => {
+        if (shape.type === targetShape.type) {
+          if (round < 2) {
+            setRound(round + 1)
+            setTargetShape(shapes[Math.floor(Math.random() * shapes.length)])
+            setTimeLeft(timeLimit)
+          } else {
+            onComplete(true)
+          }
+        } else {
+          onComplete(false)
+        }
       }
 
       return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <h2 className="text-2xl font-bold mb-4">Click the {currentShape}!</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {shapes.map((shape) => (
-              <motion.button
-                key={shape}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleShapeClick(shape)}
-                className="w-24 h-24 bg-blue-400 rounded-md flex items-center justify-center text-white text-4xl"
-              >
-                {shape === 'circle' && '●'}
-                {shape === 'square' && '■'}
-                {shape === 'triangle' && '▲'}
-                {shape === 'star' && '★'}
-              </motion.button>
-            ))}
+        <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
+          <h1 className="text-[#0047AB] text-5xl font-bold mb-2">MINIGAME</h1>
+          <p className="text-[#0047AB] text-xl mb-6">GO FAST</p>
+          <h2 className="text-[#0047AB] text-4xl font-bold mb-8">PICK A {targetShape.type.toUpperCase()}</h2>
+          
+          <div className="bg-[#8CD6E8] w-full rounded-3xl p-12 relative">
+            <div className="absolute top-4 right-4 bg-white px-4 py-2 rounded-full border-2 border-black">
+              {Math.ceil(timeLeft)}s
+            </div>
+            <div className="grid grid-cols-3 gap-8">
+              {shapes.map((shape, index) => (
+                <motion.button
+                  key={index}
+                  className="w-full aspect-square flex items-center justify-center text-6xl"
+                  onClick={() => handleShapeClick(shape)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{ backgroundColor: shape.color, border: '2px solid black', borderRadius: '12px' }}
+                >
+                  {shape.icon}
+                </motion.button>
+              ))}
+            </div>
           </div>
-          <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
         </div>
       )
     }
   },
   {
-    name: 'Simon Says',
-    component: ({ onComplete, timeLimit }: MicrogameProps) => {
-      const actions = ['Jump', 'Clap', 'Spin', 'Wave']
-      const [currentAction, setCurrentAction] = useState('')
-      const [isSaid, setIsSaid] = useState(false)
-      const [timeLeft, setTimeLeft] = useState(timeLimit)
-
-      useEffect(() => {
-        setCurrentAction(actions[Math.floor(Math.random() * actions.length)])
-        setIsSaid(Math.random() < 0.5)
-        const timer = setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev <= 0) {
-              clearInterval(timer)
-              onComplete(false)
-              return 0
-            }
-            return prev - 0.1
-          })
-        }, 100)
-        return () => clearInterval(timer)
-      }, [onComplete, timeLimit])
-
-      const handleAction = (doAction: boolean) => {
-        onComplete((isSaid && doAction) || (!isSaid && !doAction))
-      }
-
-      return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <h2 className="text-2xl font-bold mb-4">
-            {isSaid ? 'Simon says:' : ''} {currentAction}!
-          </h2>
-          <div className="flex gap-4">
-            <Button onClick={() => handleAction(true)} className="w-32">
-              Do it!
-            </Button>
-            <Button onClick={() => handleAction(false)} className="w-32">
-              Don't do it!
-            </Button>
-          </div>
-          <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
-        </div>
-      )
-    }
-  },
-  {
-    name: 'Rapid Clicking',
+    name: 'Fast Clicker',
     component: ({ onComplete, timeLimit }: MicrogameProps) => {
       const [clicks, setClicks] = useState(0)
       const [timeLeft, setTimeLeft] = useState(timeLimit)
-      const target = 3 // Reduced from 5 to 3
+      const target = 15
 
       useEffect(() => {
         const timer = setInterval(() => {
@@ -128,21 +97,31 @@ const microgames = [
           })
         }, 100)
         return () => clearInterval(timer)
-      }, [clicks, onComplete, timeLimit])
+      }, [clicks, onComplete])
 
       return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <h2 className="text-2xl font-bold mb-4">Click {target} times quickly!</h2>
-          <p className="text-xl mb-4">Clicks: {clicks}</p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-32 h-32 rounded-full bg-blue-400 text-white text-2xl font-bold"
-            onClick={() => setClicks(c => c + 1)}
-          >
-            Click!
-          </motion.button>
-          <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
+        <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
+          <h1 className="text-[#0047AB] text-5xl font-bold mb-2">MINIGAME</h1>
+          <p className="text-[#0047AB] text-xl mb-6">GO FAST</p>
+          <h2 className="text-[#0047AB] text-4xl font-bold mb-8">CLICK FAST</h2>
+          
+          <div className="relative">
+            <div className="absolute -top-4 right-0 bg-white px-4 py-2 rounded-full border-2 border-black">
+              {Math.ceil(timeLeft)}s
+            </div>
+            <motion.button
+              className="w-64 h-64 rounded-full bg-[#8CD6E8] border-2 border-black flex items-center justify-center text-white text-2xl font-bold mb-8"
+              onClick={() => setClicks(c => c + 1)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              CLICK
+            </motion.button>
+          </div>
+          
+          <div className="text-[#0047AB] text-4xl font-bold">
+            {clicks} / {target}
+          </div>
         </div>
       )
     }
@@ -154,6 +133,7 @@ const microgames = [
       const [obstaclePosition, setObstaclePosition] = useState(100)
       const [timeLeft, setTimeLeft] = useState(timeLimit)
       const [gameOver, setGameOver] = useState(false)
+      const [row, setRow] = useState(1) // Track current row
 
       useEffect(() => {
         const jumpTimer = setInterval(() => {
@@ -165,10 +145,11 @@ const microgames = [
         const obstacleTimer = setInterval(() => {
           if (!gameOver) {
             setObstaclePosition((prev) => {
-              if (prev <= 0) {
+              if (prev <= -20) {
+                setRow(current => current === 1 ? 2 : 1) // Switch rows
                 return 100
               }
-              return prev - 5
+              return prev - 2
             })
           }
         }, 50)
@@ -192,116 +173,91 @@ const microgames = [
           clearInterval(obstacleTimer)
           clearInterval(gameTimer)
         }
-      }, [isJumping, onComplete, timeLimit, gameOver])
+      }, [isJumping, onComplete, gameOver])
 
       useEffect(() => {
-        if (obstaclePosition < 20 && obstaclePosition > 0 && !isJumping && !gameOver) {
+        if (obstaclePosition < 20 && obstaclePosition > 0 && !isJumping && !gameOver && row === 1) {
           setGameOver(true)
           onComplete(false)
         }
-      }, [obstaclePosition, isJumping, onComplete, gameOver])
-
-      const handleJump = () => {
-        if (!isJumping && !gameOver) {
-          setIsJumping(true)
-        }
-      }
+      }, [obstaclePosition, isJumping, onComplete, gameOver, row])
 
       return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <h2 className="text-2xl font-bold mb-4">Jump over the obstacle!</h2>
-          <div className="w-full h-32 bg-gray-200 relative overflow-hidden">
-            <motion.div
-              className="w-8 h-16 bg-blue-500 absolute bottom-0 left-4"
-              animate={{ y: isJumping ? -40 : 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-            />
-            <motion.div
-              className="w-8 h-8 bg-red-500 absolute bottom-0"
-              style={{ left: `${obstaclePosition}%` }}
-            />
-          </div>
-          <Button onClick={handleJump} className="mt-4 w-full max-w-xs" disabled={gameOver}>
-            Jump
-          </Button>
-          <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
-        </div>
-      )
-    }
-  },
-  {
-    name: 'Circle Slide',
-    component: ({ onComplete, timeLimit }: MicrogameProps) => {
-      const [circlePosition, setCirclePosition] = useState(50)
-      const [obstacles, setObstacles] = useState<number[]>([])
-      const [timeLeft, setTimeLeft] = useState(timeLimit)
-      const [gameOver, setGameOver] = useState(false)
-
-      useEffect(() => {
-        const obstacleTimer = setInterval(() => {
-          setObstacles((prev) => {
-            const newObstacles = prev.map((y) => y + 5).filter((y) => y < 100)
-            if (newObstacles.length < 3) {
-              newObstacles.push(0)
-            }
-            return newObstacles
-          })
-        }, 100)
-
-        const gameTimer = setInterval(() => {
-          setTimeLeft((prev) => {
-            if (prev <= 0) {
-              clearInterval(gameTimer)
-              setGameOver(true)
-              onComplete(true)
-              return 0
-            }
-            return prev - 0.1
-          })
-        }, 100)
-
-        return () => {
-          clearInterval(obstacleTimer)
-          clearInterval(gameTimer)
-        }
-      }, [onComplete, timeLimit])
-
-      useEffect(() => {
-        const collision = obstacles.some((y) => y > 80 && y < 100 && Math.abs(circlePosition - 50) < 10)
-        if (collision) {
-          setGameOver(true)
-          onComplete(false)
-        }
-      }, [obstacles, circlePosition, onComplete])
-
-      const handleSlide = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!gameOver) {
-          const rect = e.currentTarget.getBoundingClientRect()
-          const x = e.clientX - rect.left
-          setCirclePosition((x / rect.width) * 100)
-        }
-      }
-
-      return (
-        <div className="flex flex-col items-center justify-center h-full">
-          <h2 className="text-2xl font-bold mb-4">Slide the circle to avoid obstacles!</h2>
-          <div
-            className="w-full h-64 bg-gray-200 relative overflow-hidden cursor-pointer"
-            onClick={handleSlide}
-          >
-            {obstacles.map((y, index) => (
+        <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
+          <h1 className="text-[#0047AB] text-5xl font-bold mb-2">MINIGAME</h1>
+          <p className="text-[#0047AB] text-xl mb-6">GO FAST</p>
+          <h2 className="text-[#0047AB] text-4xl font-bold mb-8">JUMP TO SURVIVE</h2>
+          
+          <div className="bg-[#8CD6E8] w-full rounded-3xl p-8 relative">
+            <div className="absolute top-4 right-4 bg-white px-4 py-2 rounded-full border-2 border-black">
+              {Math.ceil(timeLeft)}s
+            </div>
+            <div className="w-full h-64 bg-white rounded-xl relative overflow-hidden">
+              {/* First Row */}
+              <div className="absolute bottom-32 w-full h-1 bg-black" />
               <motion.div
-                key={index}
-                className="w-4 h-4 bg-red-500 absolute"
-                style={{ left: `${Math.random() * 100}%`, top: `${y}%` }}
-              />
-            ))}
-            <motion.div
-              className="w-8 h-8 bg-blue-500 rounded-full absolute bottom-4"
-              animate={{ x: `${circlePosition}%` }}
-            />
+                className="absolute bottom-[129px] left-16"
+                animate={{ y: isJumping && row === 2 ? -60 : 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+              >
+                <div className="w-10 h-12 bg-yellow-400 rounded-lg relative">
+                  <div className="absolute top-1 w-6 h-6 bg-yellow-200 rounded-full left-2" />
+                  <div className="absolute bottom-0 w-4 h-4 bg-blue-500 rounded-sm left-0" />
+                  <div className="absolute bottom-0 w-4 h-4 bg-blue-500 rounded-sm right-0" />
+                </div>
+              </motion.div>
+
+              {/* Second Row */}
+              <div className="absolute bottom-0 w-full h-1 bg-black" />
+              <motion.div
+                className="absolute bottom-1 left-16"
+                animate={{ y: isJumping && row === 1 ? -60 : 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+              >
+                <div className="w-10 h-12 bg-yellow-400 rounded-lg relative">
+                  <div className="absolute top-1 w-6 h-6 bg-yellow-200 rounded-full left-2" />
+                  <div className="absolute bottom-0 w-4 h-4 bg-blue-500 rounded-sm left-0" />
+                  <div className="absolute bottom-0 w-4 h-4 bg-blue-500 rounded-sm right-0" />
+                </div>
+              </motion.div>
+
+              {/* Obstacles */}
+              <motion.div
+                className="absolute"
+                style={{ 
+                  left: `${obstaclePosition}%`,
+                  bottom: row === 1 ? '1px' : '129px'
+                }}
+              >
+                <div className="w-10 h-12 bg-red-500 rounded-sm relative">
+                  <div className="absolute top-0 w-full h-2 bg-red-700" />
+                  <div className="absolute bottom-0 w-full h-2 bg-red-700" />
+                </div>
+              </motion.div>
+
+              {/* Desk with computer - both rows */}
+              <div className="absolute bottom-1 right-8">
+                <div className="w-20 h-12 bg-gray-800 rounded-sm relative">
+                  <div className="absolute top-0 w-12 h-8 bg-blue-400 rounded-sm left-4" />
+                  <div className="absolute bottom-0 w-full h-2 bg-gray-900" />
+                </div>
+              </div>
+              <div className="absolute bottom-[129px] right-8">
+                <div className="w-20 h-12 bg-gray-800 rounded-sm relative">
+                  <div className="absolute top-0 w-12 h-8 bg-blue-400 rounded-sm left-4" />
+                  <div className="absolute bottom-0 w-full h-2 bg-gray-900" />
+                </div>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => !isJumping && setIsJumping(true)}
+              className="w-full mt-8 bg-white hover:bg-gray-50 text-black text-2xl font-bold px-6 py-4 rounded-xl border-2 border-black transition-all duration-200 hover:scale-105"
+              disabled={gameOver}
+            >
+              CLICK TO JUMP
+            </button>
           </div>
-          <Progress value={(timeLeft / timeLimit) * 100} className="w-full mt-4" />
         </div>
       )
     }
@@ -314,36 +270,16 @@ interface MicrogameContainerProps {
 }
 
 export function MicrogameContainer({ onGameComplete, playedGames }: MicrogameContainerProps) {
-  const timeLimit = 8; // Adjusted time limit to 8 seconds
-
+  const timeLimit = 5
   const [currentGame, setCurrentGame] = useState(0)
 
   useEffect(() => {
-    // Find the first unplayed game
     const nextUnplayedGame = microgames.findIndex((_, index) => !playedGames.includes(index))
     setCurrentGame(nextUnplayedGame !== -1 ? nextUnplayedGame : Math.floor(Math.random() * microgames.length))
   }, [playedGames])
 
-  const handleGameComplete = useCallback((success: boolean) => {
-    onGameComplete(success)
-  }, [onGameComplete])
-
-  const CurrentGameMemo = useMemo(() => {
-    const CurrentGame = microgames[currentGame].component
-    return <CurrentGame onComplete={handleGameComplete} timeLimit={timeLimit} />
-  }, [currentGame, handleGameComplete, timeLimit])
-
-  return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-center">{microgames[currentGame].name}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {CurrentGameMemo}
-      </CardContent>
-    </Card>
-  )
+  const CurrentGame = microgames[currentGame].component
+  return <CurrentGame onComplete={onGameComplete} timeLimit={timeLimit} />
 }
 
 export { microgames }
-

@@ -22,6 +22,7 @@ export default function Home() {
 
   const handleStart = useCallback(() => {
     setGameStarted(true)
+    setShowQuestion(true)
   }, [])
 
   const handleGameComplete = useCallback((success: boolean) => {
@@ -48,7 +49,7 @@ export default function Home() {
 
   const handleRestart = useCallback(() => {
     setCurrentQuestionIndex(0)
-    setShowQuestion(false)
+    setShowQuestion(true)
     setGamesCompleted(0)
     setAnswers([])
     setGameStarted(false)
@@ -76,12 +77,14 @@ export default function Home() {
                 question={questions[currentQuestionIndex].question}
                 options={questions[currentQuestionIndex].options}
                 onAnswer={handleAnswer}
+                currentQuestion={currentQuestionIndex}
+                totalQuestions={TOTAL_QUESTIONS}
               />
             )}
             {gameStarted && !showEndMessage && !showQuestion && (
               <MicrogameContainer
                 onGameComplete={handleGameComplete}
-                playedGames={playedGames}
+                playedGames={playedGames.length === 0 ? [] : playedGames}
               />
             )}
             {showEndMessage && (

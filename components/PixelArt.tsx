@@ -7,6 +7,7 @@ interface PixelArtProps {
   activeColor: string
   onColorSelect: (color: string) => void
   onPixelClick: (index: number) => void
+  pixelsLeft: number
 }
 
 const COLORS = [
@@ -21,21 +22,22 @@ const COLORS = [
   '#000000', // Black
 ]
 
-export function PixelArt({ pixels, activeColor, onColorSelect, onPixelClick }: PixelArtProps) {
+export function PixelArt({ pixels, activeColor, onColorSelect, onPixelClick, pixelsLeft }: PixelArtProps) {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle className="text-center text-[#0047AB] text-3xl">Paint and Enjoy</CardTitle>
-        <p className="text-center text-gray-500">or destroy the image</p>
+        <p className="text-center text-gray-500">You have {pixelsLeft} pixels to place</p>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-4">
-        <div className="grid grid-cols-12 gap-0 bg-white rounded-xl border-2 border-gray-200 p-2">
+        <div className="grid grid-cols-16 gap-0 bg-white rounded-xl border-2 border-gray-200 p-2" style={{ width: '256px', height: '256px' }}>
           {pixels.map((color, index) => (
             <button
               key={index}
-              className="w-6 h-6 border border-gray-100 transition-colors duration-150 hover:opacity-90"
+              className="w-4 h-4 border border-gray-100 transition-colors duration-150 hover:opacity-90"
               style={{ backgroundColor: color }}
               onClick={() => onPixelClick(index)}
+              disabled={pixelsLeft === 0 && color === '#FFFFFF'}
             />
           ))}
         </div>
@@ -56,7 +58,7 @@ export function PixelArt({ pixels, activeColor, onColorSelect, onPixelClick }: P
         </div>
 
         <div className="flex items-center justify-between w-full mt-4">
-          <p className="text-sm text-gray-500">Pixels Left: {50 - pixels.filter(p => p !== '#FFFFFF').length}</p>
+          <p className="text-sm text-gray-500">Pixels Left: {pixelsLeft}</p>
           <Button variant="outline" className="text-[#0047AB]">
             Save
           </Button>

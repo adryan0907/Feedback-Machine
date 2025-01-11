@@ -1,6 +1,6 @@
 export interface Question {
-  question: string
-  options: string[]
+  question: string;
+  options: string[];
 }
 
 export const questions: Question[] = [
@@ -24,5 +24,5 @@ export const questions: Question[] = [
     question: "What area do you think the university should improve the most?",
     options: ["Teaching quality", "Campus facilities", "Student support services", "Research opportunities", "Career guidance"]
   }
-]
+];
 

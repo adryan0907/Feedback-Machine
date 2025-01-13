@@ -25,8 +25,8 @@ export function StartPage({ onStart }: StartPageProps) {
         <div className="relative w-full max-w-2xl mx-auto mb-8">
           <div className="absolute inset-0 bg-[#8CD6E8] rounded-full transform translate-y-1/4"></div>
           <img
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/iPad%20Pro%2012.9_%20-%203-YPHfn0op80RXYew94uTZA5ZDvz2jPy.png"
-            alt="3D character illustration of Tomash"
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/mascott.jpg-DT5IHpbvWghEIBKVFcX9n9fwjHF03j.jpeg"
+            alt="3D character mascot in yellow jacket"
             className="relative z-10 w-full h-auto"
           />
         </div>

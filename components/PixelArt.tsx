@@ -8,6 +8,7 @@ interface PixelArtProps {
   onColorSelect: (color: string) => void
   onPixelClick: (index: number) => void
   pixelsLeft: number
+  onReset: () => void
 }
 
 const COLORS = [
@@ -22,20 +23,20 @@ const COLORS = [
   '#000000', // Black
 ]
 
-export function PixelArt({ pixels, activeColor, onColorSelect, onPixelClick, pixelsLeft }: PixelArtProps) {
+export function PixelArt({ pixels, activeColor, onColorSelect, onPixelClick, pixelsLeft, onReset }: PixelArtProps) {
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full mx-auto">
       <CardHeader>
         <CardTitle className="text-center text-[#0047AB] text-3xl">Paint and Enjoy</CardTitle>
         <p className="text-center text-gray-500">You have {pixelsLeft} pixels to place</p>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-4">
-        <div className="grid grid-cols-16 gap-0 bg-white rounded-xl border-2 border-gray-200 p-2" style={{ width: '256px', height: '256px' }}>
+        <div className="grid grid-cols-30 gap-0 bg-white rounded-xl border-2 border-gray-200 p-2 w-full aspect-square">
           {pixels.map((color, index) => (
             <button
               key={index}
-              className="w-4 h-4 border border-gray-100 transition-colors duration-150 hover:opacity-90"
-              style={{ backgroundColor: color }}
+              className="w-full h-full border border-gray-100 transition-colors duration-150 hover:opacity-90"
+              style={{ backgroundColor: color, aspectRatio: '1 / 1' }}
               onClick={() => onPixelClick(index)}
               disabled={pixelsLeft === 0 && color === '#FFFFFF'}
             />
@@ -59,9 +60,14 @@ export function PixelArt({ pixels, activeColor, onColorSelect, onPixelClick, pix
 
         <div className="flex items-center justify-between w-full mt-4">
           <p className="text-sm text-gray-500">Pixels Left: {pixelsLeft}</p>
-          <Button variant="outline" className="text-[#0047AB]">
-            Save
-          </Button>
+          <div className="space-x-2">
+            <Button variant="outline" className="text-[#0047AB]" onClick={onReset}>
+              Reset
+            </Button>
+            <Button variant="outline" className="text-[#0047AB]">
+              Save
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

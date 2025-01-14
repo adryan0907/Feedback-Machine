@@ -2,21 +2,21 @@
 
 import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import { MicrogameContainer, microgames } from '@/components/MicrogameContainer'
 import { QuestionCard } from '@/components/QuestionCard'
 import { StartPage } from '@/components/StartPage'
-import { EndScreen } from '@/components/EndScreen'
 import { questions } from './utils/questions'
 
 const TOTAL_QUESTIONS = 5
 
 export default function Home() {
+  const router = useRouter()
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [showQuestion, setShowQuestion] = useState(false)
   const [gamesCompleted, setGamesCompleted] = useState(0)
   const [answers, setAnswers] = useState<string[]>([])
   const [gameStarted, setGameStarted] = useState(false)
-  const [showEndMessage, setShowEndMessage] = useState(false)
   const [successfulGames, setSuccessfulGames] = useState(0)
   const [playedGames, setPlayedGames] = useState<number[]>([])
 
@@ -39,31 +39,20 @@ export default function Home() {
     setShowQuestion(false)
     setCurrentQuestionIndex((prev) => prev + 1)
     if (currentQuestionIndex + 1 >= TOTAL_QUESTIONS) {
-      setShowEndMessage(true)
+      router.push('/pixel-art')
     } else {
       if (playedGames.length === microgames.length) {
         setPlayedGames([])
       }
     }
-  }, [currentQuestionIndex, playedGames.length])
-
-  const handleRestart = useCallback(() => {
-    setCurrentQuestionIndex(0)
-    setShowQuestion(true)
-    setGamesCompleted(0)
-    setAnswers([])
-    setGameStarted(false)
-    setShowEndMessage(false)
-    setSuccessfulGames(0)
-    setPlayedGames([])
-  }, [])
+  }, [currentQuestionIndex, playedGames.length, router])
 
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto p-4">
         <AnimatePresence mode="wait">
           <motion.div
-            key={gameStarted ? (showEndMessage ? "end" : "game") : "start"}
+            key={gameStarted ? "game" : "start"}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
@@ -72,7 +61,7 @@ export default function Home() {
             {!gameStarted && (
               <StartPage onStart={handleStart} />
             )}
-            {gameStarted && !showEndMessage && showQuestion && (
+            {gameStarted && showQuestion && (
               <QuestionCard
                 question={questions[currentQuestionIndex].question}
                 options={questions[currentQuestionIndex].options}
@@ -81,18 +70,10 @@ export default function Home() {
                 totalQuestions={TOTAL_QUESTIONS}
               />
             )}
-            {gameStarted && !showEndMessage && !showQuestion && (
+            {gameStarted && !showQuestion && (
               <MicrogameContainer
                 onGameComplete={handleGameComplete}
                 playedGames={playedGames.length === 0 ? [] : playedGames}
-              />
-            )}
-            {showEndMessage && (
-              <EndScreen
-                gamesCompleted={gamesCompleted}
-                successfulGames={successfulGames}
-                answersCount={answers.length}
-                onRestart={handleRestart}
               />
             )}
           </motion.div>

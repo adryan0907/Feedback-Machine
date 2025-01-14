@@ -11,7 +11,7 @@ interface EndScreenProps {
 }
 
 export function EndScreen({ gamesCompleted, successfulGames, answersCount, onRestart }: EndScreenProps) {
-  const [pixels, setPixels] = useState<string[]>(Array(256).fill('#FFFFFF')) // 16x16 grid
+  const [pixels, setPixels] = useState<string[]>(Array(900).fill('#FFFFFF')) // 30x30 grid
   const [activeColor, setActiveColor] = useState('#FF0000')
   const [pixelsLeft, setPixelsLeft] = useState(3)
 
@@ -24,8 +24,13 @@ export function EndScreen({ gamesCompleted, successfulGames, answersCount, onRes
     }
   }
 
+  const handleReset = () => {
+    setPixels(Array(900).fill('#FFFFFF'))
+    setPixelsLeft(3)
+  }
+
   return (
-    <div className="flex flex-col items-center w-full max-w-4xl mx-auto">
+    <div className="flex flex-col items-center w-full max-w-6xl mx-auto">
       <div className="inline-block px-6 py-2 mb-6 rounded-full border-2 border-black">
         <span className="text-xl font-medium">Complete!</span>
       </div>
@@ -57,6 +62,7 @@ export function EndScreen({ gamesCompleted, successfulGames, answersCount, onRes
         onColorSelect={setActiveColor}
         onPixelClick={handlePixelClick}
         pixelsLeft={pixelsLeft}
+        onReset={handleReset}
       />
       
       <motion.button

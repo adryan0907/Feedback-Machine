@@ -76,11 +76,9 @@ Follow these steps to set up the app locally:
 
 Once started, the app will be accessible in your browser at http://localhost:3000.
 
-Usage
-In the app, users can click on a pixel in the grid to add it. Each pixel represents a piece of user input, resulting in a visual feedback mechanism. The project serves as a demonstration of how user input can be collected in a playful and engaging way.
+## Usage In the app 
+users can click on a pixel in the grid to add it. Each pixel represents a piece of user input, resulting in a visual feedback mechanism. The project serves as a demonstration of how user input can be collected in a playful and engaging way.
 
-Future Enhancements
+## Future Enhancements
 No future enhancements are planned, as the project is near completion. The focus is on finalizing the current functionality and presenting the results.
 
-License
-This project is licensed under the MIT License. See the LICENSE file for more details.

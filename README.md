@@ -61,16 +61,19 @@ Follow these steps to set up the app locally:
 1. Clone the repository:
    ```bash
    git clone https://github.com/adryan0907/Feedback-Machine.git
-Navigate to the project directory:
 
+2. Navigate to the project directory:
+    ```bash
+    cd Feedback-Machine
 
-cd Feedback-Machine
-Install the required dependencies:
+3. Install the required dependencies:
+    ```bash
+    npm install
 
-npm install
-Start the development server:
+4. Start the development server:
+    ```bash
+    npm start
 
-npm start
 Once started, the app will be accessible in your browser at http://localhost:3000.
 
 Usage

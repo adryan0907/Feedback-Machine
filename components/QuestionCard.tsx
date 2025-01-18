@@ -20,7 +20,7 @@ export function QuestionCard({ question, options, onAnswer, currentQuestion, tot
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        Question {currentQuestion + 1}
+        {question}
       </motion.h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mb-8">
@@ -32,10 +32,16 @@ export function QuestionCard({ question, options, onAnswer, currentQuestion, tot
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
+            whileHover={{ scale: 1.02 }}
           >
-            <div className="bg-[#8CD6E8] rounded-2xl p-6 transform transition-transform group-hover:scale-105">
-              <h3 className="text-xl font-bold mb-2">ANSWER</h3>
-              <p className="text-lg">{option}</p>
+            <div 
+              className="bg-[#8CD6E8] rounded-2xl p-6 transition-all duration-300 ease-out
+                         group-hover:shadow-lg group-hover:bg-[#7BC5D7] relative"
+            >
+              <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <p className="text-lg font-medium transform group-hover:translate-y-[-2px] transition-transform duration-300">
+                {option}
+              </p>
             </div>
           </motion.button>
         ))}
@@ -49,7 +55,6 @@ export function QuestionCard({ question, options, onAnswer, currentQuestion, tot
           transition={{ duration: 0.5 }}
         />
       </div>
-
     </div>
   )
 }

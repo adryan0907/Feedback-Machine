@@ -4,13 +4,46 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 
+// Define the image URL from StartPage
+const TOMASH_IMAGE = "https://i.ibb.co/rmc10Mt/ovodv-httpss-mj-run9g-LNTGXsh24-Happy-guy-standing-open-month-cd580a6c-5a38-44ca-9c27-3e549b9eee5b-0.png"
+
+// Define an inspiring pixel art template - a simple landscape
+const TEMPLATE_ART = [
+  // Sun (yellow)
+  { positions: [2 * 30 + 3, 2 * 30 + 4, 3 * 30 + 3, 3 * 30 + 4], color: '#FFDC0044' },
+  // Clouds (light blue)
+  { positions: [2 * 30 + 10, 2 * 30 + 11, 2 * 30 + 12, 3 * 30 + 11], color: '#00BCD444' },
+  { positions: [3 * 30 + 20, 3 * 30 + 21, 3 * 30 + 22, 2 * 30 + 21], color: '#00BCD444' },
+  // Trees (green)
+  { positions: [
+    20 * 30 + 8, 21 * 30 + 8, 22 * 30 + 8, // trunk
+    19 * 30 + 7, 19 * 30 + 8, 19 * 30 + 9, // leaves
+    18 * 30 + 8
+  ], color: '#2ECC4044' },
+  { positions: [
+    20 * 30 + 15, 21 * 30 + 15, 22 * 30 + 15, // trunk
+    19 * 30 + 14, 19 * 30 + 15, 19 * 30 + 16, // leaves
+    18 * 30 + 15
+  ], color: '#2ECC4044' },
+  // Ground (darker green)
+  { positions: Array.from({ length: 30 }, (_, i) => 23 * 30 + i), color: '#2ECC4044' },
+  // Mountains (purple)
+  { positions: [
+    15 * 30 + 5, 16 * 30 + 4, 16 * 30 + 5, 16 * 30 + 6,
+    17 * 30 + 3, 17 * 30 + 4, 17 * 30 + 5, 17 * 30 + 6, 17 * 30 + 7
+  ], color: '#B10DC944' }
+].flat()
+
+const GRID_SIZE = 30 // Fixed 30x30 grid
+
 export default function PixelArtPage() {
   const router = useRouter()
   const [pixels, setPixels] = useState<string[]>([])
   const [currentSessionPixels, setCurrentSessionPixels] = useState<number[]>([])
   const [activeColor, setActiveColor] = useState('#FF4136')
-  const [pixelsLeft, setPixelsLeft] = useState(3)
-  const [gridSize, setGridSize] = useState({ rows: 30, cols: 30 })
+  const [pixelsLeft, setPixelsLeft] = useState(5)
+  const [showEndImage, setShowEndImage] = useState(false)
+  const [countdown, setCountdown] = useState(3)
 
   const COLORS = [
     '#FF4136', // Red
@@ -25,27 +58,18 @@ export default function PixelArtPage() {
   ]
 
   useEffect(() => {
-    const totalPixels = gridSize.rows * gridSize.cols
-    const savedPixels = localStorage.getItem('pixelGrid')
-    if (savedPixels) {
-      setPixels(JSON.parse(savedPixels))
-    } else {
-      setPixels(Array(totalPixels).fill('#FFFFFF'))
-    }
-  }, [gridSize])
-
-  useEffect(() => {
-    const handleResize = () => {
-      const containerWidth = Math.min(window.innerWidth * 0.9, 600)
-      const pixelSize = containerWidth / 30 // We want 30 pixels per row
-      const rows = Math.floor(containerWidth / pixelSize)
-      const cols = Math.floor((window.innerHeight * 0.6) / pixelSize) // Adjust this multiplier as needed
-      setGridSize({ rows, cols })
-    }
-
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    const totalPixels = GRID_SIZE * GRID_SIZE
+    const initialPixels = Array(totalPixels).fill('#FFFFFF')
+    
+    // Add the template art with 30% opacity
+    TEMPLATE_ART.forEach(item => {
+      item.positions.forEach(position => {
+        if (position < totalPixels) {
+          initialPixels[position] = item.color
+        }
+      })
+    })
+    setPixels(initialPixels)
   }, [])
 
   const handlePixelClick = (index: number) => {
@@ -58,45 +82,80 @@ export default function PixelArtPage() {
     }
   }
 
-  const handleReset = () => {
-    const newPixels = [...pixels]
-    currentSessionPixels.forEach(index => {
-      newPixels[index] = '#FFFFFF'
-    })
-    setPixels(newPixels)
-    setCurrentSessionPixels([])
-    setPixelsLeft(3)
+  const handleSave = () => {
+    setShowEndImage(true)
+    
+    // Start countdown with smooth transition
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          setTimeout(() => {
+            // Reset everything and redirect to start
+            window.location.href = '/'
+          }, 500)
+          return 3
+        }
+        return prev - 1
+      })
+    }, 1000)
   }
 
-  const handleSave = () => {
-    localStorage.setItem('pixelGrid', JSON.stringify(pixels))
-    router.push('/end-screen')
+  if (showEndImage) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className={`text-center max-w-4xl mx-auto px-4 transition-opacity duration-500 ${showEndImage ? 'opacity-100' : 'opacity-0'}`}>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+            Thank you for your <span className="text-[#8CD6E8]">art</span>!
+          </h1>
+          <p className="text-2xl text-gray-600 mb-8">
+            Returning to start in {countdown} seconds...
+          </p>
+          <div className="relative w-full max-w-2xl mx-auto">
+            <div className="absolute inset-0 bg-[#8CD6E8] rounded-full transform translate-y-1/4"></div>
+            <img
+              src={TOMASH_IMAGE}
+              alt="3D character mascot in yellow jacket"
+              className="relative z-10 w-full h-auto"
+            />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
+      <div className={`max-w-6xl mx-auto transition-opacity duration-500 ${showEndImage ? 'opacity-0' : 'opacity-100'}`}>
         <div className="text-center mb-8">
+          <p className="text-xl text-gray-600 mb-6">Thank you for your participation!</p>
           <h1 className="text-4xl font-bold text-[#0047AB] mb-2">Paint and Enjoy</h1>
           <p className="text-gray-500">or destroy the image</p>
         </div>
-
+        
         <div className="bg-white rounded-3xl shadow-lg p-8">
           <div className="flex justify-center mb-8 overflow-auto">
             <div 
               className="grid gap-0 bg-white rounded-xl border-2 border-gray-200 p-2"
               style={{
-                gridTemplateColumns: `repeat(${gridSize.cols}, 1fr)`,
+                gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
                 width: 'min(90vw, 600px)',
                 height: 'auto',
-                aspectRatio: `${gridSize.cols} / ${gridSize.rows}`
+                aspectRatio: '1 / 1'
               }}
             >
               {pixels.map((color, index) => (
                 <button
                   key={index}
-                  className="w-full h-full border border-gray-100 transition-colors duration-150 hover:opacity-90"
-                  style={{ backgroundColor: color, aspectRatio: '1 / 1' }}
+                  className="w-full h-full transition-all duration-150 hover:brightness-90 rounded-sm"
+                  style={{ 
+                    backgroundColor: color, 
+                    aspectRatio: '1 / 1',
+                    padding: 0,
+                    margin: 0,
+                    border: 'none',
+                    outline: 'none'
+                  }}
                   onClick={() => handlePixelClick(index)}
                   disabled={pixelsLeft === 0 && !currentSessionPixels.includes(index)}
                 />
@@ -122,21 +181,12 @@ export default function PixelArtPage() {
               <p className="text-xl font-medium">
                 Pixels Left: <span className="text-[#0047AB] font-bold">{pixelsLeft}</span>
               </p>
-              <div className="space-x-4">
-                <Button 
-                  variant="outline" 
-                  className="text-[#0047AB] px-8 py-2 text-lg"
-                  onClick={handleReset}
-                >
-                  Reset
-                </Button>
-                <Button 
-                  className="bg-[#0047AB] hover:bg-[#003380] text-white px-8 py-2 text-lg"
-                  onClick={handleSave}
-                >
-                  Save
-                </Button>
-              </div>
+              <Button 
+                className="bg-[#0047AB] hover:bg-[#003380] text-white px-8 py-2 text-lg"
+                onClick={handleSave}
+              >
+                Save
+              </Button>
             </div>
           </div>
         </div>

@@ -39,7 +39,10 @@ export function QuestionCard({ question, options, onAnswer, currentQuestion, tot
                          group-hover:shadow-lg group-hover:bg-[#7BC5D7] relative"
             >
               <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <p className="text-lg font-medium transform group-hover:translate-y-[-2px] transition-transform duration-300">
+              <h3 className="text-xl font-bold mb-2 transform group-hover:translate-y-[-2px] transition-transform duration-300">
+                ANSWER
+              </h3>
+              <p className="text-lg transform group-hover:translate-y-[-2px] transition-transform duration-300">
                 {option}
               </p>
             </div>

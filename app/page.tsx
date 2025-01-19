@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { QuestionCard } from '@/components/QuestionCard'
 import { StartPage } from '@/components/StartPage'
 import { questions } from './utils/questions'
-import { PixelArt } from '@/components/PixelArt'
+import PixelArt from '@/components/PixelArt'
 
 const TOTAL_QUESTIONS = 5
 

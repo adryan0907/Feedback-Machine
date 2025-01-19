@@ -15,7 +15,6 @@ export default function Home() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [answers, setAnswers] = useState<string[]>([])
   const [gameStarted, setGameStarted] = useState(false)
-  const [questionsCompleted, setQuestionsCompleted] = useState(false)
 
   const handleStart = useCallback(() => {
     setGameStarted(true)
@@ -24,17 +23,16 @@ export default function Home() {
   const handleAnswer = useCallback((answer: string) => {
     setAnswers((prev) => [...prev, answer])
     setCurrentQuestionIndex((prev) => prev + 1)
-    if (currentQuestionIndex + 1 >= TOTAL_QUESTIONS) {
-      setQuestionsCompleted(true)
-    }
-  }, [currentQuestionIndex])
+  }, [])
+
+  const isQuestionsCompleted = currentQuestionIndex >= TOTAL_QUESTIONS
 
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto p-4">
         <AnimatePresence mode="wait">
           <motion.div
-            key={!gameStarted ? "start" : questionsCompleted ? "pixel-art" : "questions"}
+            key={!gameStarted ? "start" : isQuestionsCompleted ? "pixel-art" : "question"}
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -50 }}
@@ -43,7 +41,7 @@ export default function Home() {
             {!gameStarted && (
               <StartPage onStart={handleStart} />
             )}
-            {gameStarted && !questionsCompleted && (
+            {gameStarted && !isQuestionsCompleted && (
               <QuestionCard
                 question={questions[currentQuestionIndex].question}
                 options={questions[currentQuestionIndex].options}
@@ -52,8 +50,16 @@ export default function Home() {
                 totalQuestions={TOTAL_QUESTIONS}
               />
             )}
-            {questionsCompleted && (
-              <PixelArt />
+            {isQuestionsCompleted && (
+              <div className="text-center">
+                <h2 className="text-3xl font-bold text-[#0047AB] mb-8">
+                  Congratulations! You've completed all {TOTAL_QUESTIONS} questions!
+                </h2>
+                <p className="text-xl text-[#0047AB] mb-8">
+                  As a reward, you can now create your own pixel art!
+                </p>
+                <PixelArt />
+              </div>
             )}
           </motion.div>
         </AnimatePresence>

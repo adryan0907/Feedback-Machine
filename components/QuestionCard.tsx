@@ -53,4 +53,3 @@ export function QuestionCard({ question, options, onAnswer, currentQuestion, tot
     </div>
   )
 }
-

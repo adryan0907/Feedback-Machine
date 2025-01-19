@@ -50,4 +50,3 @@ export function StartPage({ onStart }: StartPageProps) {
     </div>
   )
 }
-

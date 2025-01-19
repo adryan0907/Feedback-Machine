@@ -1,22 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 
-<<<<<<< HEAD
-interface PixelArtProps {
-  pixels: string[]
-  activeColor: string
-  onColorSelect: (color: string) => void
-  onPixelClick: (index: number) => void
-  pixelsLeft: number
-  onReset: () => void
-}
-=======
 // Define the image URL from StartPage
 const TOMASH_IMAGE = "https://i.ibb.co/rmc10Mt/ovodv-httpss-mj-run9g-LNTGXsh24-Happy-guy-standing-open-month-cd580a6c-5a38-44ca-9c27-3e549b9eee5b-0.png"
->>>>>>> master
 
 // Define an inspiring pixel art template - a simple landscape
 const TEMPLATE_ART = [
@@ -43,48 +31,32 @@ const TEMPLATE_ART = [
     15 * 30 + 5, 16 * 30 + 4, 16 * 30 + 5, 16 * 30 + 6,
     17 * 30 + 3, 17 * 30 + 4, 17 * 30 + 5, 17 * 30 + 6, 17 * 30 + 7
   ], color: '#B10DC944' }
-].flat()
+]
 
-<<<<<<< HEAD
-export function PixelArt({ pixels, activeColor, onColorSelect, onPixelClick, pixelsLeft, onReset }: PixelArtProps) {
-  return (
-    <Card className="w-full mx-auto">
-      <CardHeader>
-        <CardTitle className="text-center text-[#0047AB] text-3xl">Paint and Enjoy</CardTitle>
-        <p className="text-center text-gray-500">You have {pixelsLeft} pixels to place</p>
-      </CardHeader>
-      <CardContent className="flex flex-col items-center gap-4">
-        <div className="grid grid-cols-30 gap-0 bg-white rounded-xl border-2 border-gray-200 p-2 w-full aspect-square">
-          {pixels.map((color, index) => (
-            <button
-              key={index}
-              className="w-full h-full border border-gray-100 transition-colors duration-150 hover:opacity-90"
-              style={{ backgroundColor: color, aspectRatio: '1 / 1' }}
-              onClick={() => onPixelClick(index)}
-              disabled={pixelsLeft === 0 && color === '#FFFFFF'}
-=======
 const GRID_SIZE = 30 // Fixed 30x30 grid
+const COLORS = [
+  '#FF4136', // Red
+  '#FF851B', // Orange
+  '#FFDC00', // Yellow
+  '#2ECC40', // Green
+  '#00BCD4', // Light Blue
+  '#0074D9', // Dark Blue
+  '#B10DC9', // Purple
+  '#FF69B4', // Pink
+  '#111111', // Black
+]
 
-export default function PixelArtPage() {
-  const router = useRouter()
+interface PixelArtProps {
+  onComplete?: () => void
+}
+
+export function PixelArt({ onComplete }: PixelArtProps) {
   const [pixels, setPixels] = useState<string[]>([])
   const [currentSessionPixels, setCurrentSessionPixels] = useState<number[]>([])
-  const [activeColor, setActiveColor] = useState('#FF4136')
+  const [activeColor, setActiveColor] = useState(COLORS[0])
   const [pixelsLeft, setPixelsLeft] = useState(5)
   const [showEndImage, setShowEndImage] = useState(false)
   const [countdown, setCountdown] = useState(3)
-
-  const COLORS = [
-    '#FF4136', // Red
-    '#FF851B', // Orange
-    '#FFDC00', // Yellow
-    '#2ECC40', // Green
-    '#00BCD4', // Light Blue
-    '#0074D9', // Dark Blue
-    '#B10DC9', // Purple
-    '#FF69B4', // Pink
-    '#111111', // Black
-  ]
 
   useEffect(() => {
     const totalPixels = GRID_SIZE * GRID_SIZE
@@ -120,8 +92,12 @@ export default function PixelArtPage() {
         if (prev <= 1) {
           clearInterval(timer)
           setTimeout(() => {
-            // Reset everything and redirect to start
-            window.location.href = '/'
+            if (onComplete) {
+              onComplete()
+            } else {
+              // Fallback to redirect if no onComplete handler
+              window.location.href = '/'
+            }
           }, 500)
           return 3
         }
@@ -143,10 +119,9 @@ export default function PixelArtPage() {
           <div className="relative w-full max-w-2xl mx-auto">
             <div className="absolute inset-0 bg-[#8CD6E8] rounded-full transform translate-y-1/4"></div>
             <img
-              src={TOMASH_IMAGE}
+              src={TOMASH_IMAGE || "/placeholder.svg"}
               alt="3D character mascot in yellow jacket"
               className="relative z-10 w-full h-auto"
->>>>>>> master
             />
           </div>
         </div>
@@ -154,18 +129,6 @@ export default function PixelArtPage() {
     )
   }
 
-<<<<<<< HEAD
-        <div className="flex items-center justify-between w-full mt-4">
-          <p className="text-sm text-gray-500">Pixels Left: {pixelsLeft}</p>
-          <div className="space-x-2">
-            <Button variant="outline" className="text-[#0047AB]" onClick={onReset}>
-              Reset
-            </Button>
-            <Button variant="outline" className="text-[#0047AB]">
-              Save
-            </Button>
-          </div>
-=======
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className={`max-w-6xl mx-auto transition-opacity duration-500 ${showEndImage ? 'opacity-0' : 'opacity-100'}`}>
@@ -173,7 +136,6 @@ export default function PixelArtPage() {
           <p className="text-xl text-gray-600 mb-6">Thank you for your participation!</p>
           <h1 className="text-4xl font-bold text-[#0047AB] mb-2">Paint and Enjoy</h1>
           <p className="text-gray-500">or destroy the image</p>
->>>>>>> master
         </div>
         
         <div className="bg-white rounded-3xl shadow-lg p-8">

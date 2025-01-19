@@ -31,11 +31,7 @@ export function StartPage({ onStart }: StartPageProps) {
         <div className="relative w-full max-w-2xl mx-auto mb-8">
           <div className="absolute inset-0 bg-[#8CD6E8] rounded-full transform translate-y-1/4"></div>
           <img
-<<<<<<< HEAD
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/mascott.jpg-DT5IHpbvWghEIBKVFcX9n9fwjHF03j.jpeg"
-=======
             src="https://i.ibb.co/rmc10Mt/ovodv-httpss-mj-run9g-LNTGXsh24-Happy-guy-standing-open-month-cd580a6c-5a38-44ca-9c27-3e549b9eee5b-0.png"
->>>>>>> master
             alt="3D character mascot in yellow jacket"
             className="relative z-10 w-full h-auto"
           />
@@ -54,4 +50,3 @@ export function StartPage({ onStart }: StartPageProps) {
     </div>
   )
 }
-

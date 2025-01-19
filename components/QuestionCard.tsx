@@ -13,7 +13,7 @@ export function QuestionCard({ question, options, onAnswer, currentQuestion, tot
   const progress = ((currentQuestion + 1) / totalQuestions) * 100
 
   return (
-    <div className="flex flex-col items-center w-full max-w-4xl mx-auto">
+    <div className="flex flex-col items-center justify-center text-center min-h-screen mx-auto">
       <motion.h2 
         className="text-6xl font-bold mb-12 text-center"
         initial={{ opacity: 0, y: 20 }}
@@ -32,19 +32,10 @@ export function QuestionCard({ question, options, onAnswer, currentQuestion, tot
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            whileHover={{ scale: 1.02 }}
           >
-            <div 
-              className="bg-[#8CD6E8] rounded-2xl p-6 transition-all duration-300 ease-out
-                         group-hover:shadow-lg group-hover:bg-[#7BC5D7] relative"
-            >
-              <div className="absolute inset-0 bg-white/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <h3 className="text-xl font-bold mb-2 transform group-hover:translate-y-[-2px] transition-transform duration-300">
-                ANSWER
-              </h3>
-              <p className="text-lg transform group-hover:translate-y-[-2px] transition-transform duration-300">
-                {option}
-              </p>
+            <div className="bg-[#8CD6E8] rounded-2xl p-6 transform transition-transform group-hover:scale-105">
+              
+              <p className="text-lg">{option}</p>
             </div>
           </motion.button>
         ))}
@@ -58,6 +49,7 @@ export function QuestionCard({ question, options, onAnswer, currentQuestion, tot
           transition={{ duration: 0.5 }}
         />
       </div>
+
     </div>
   )
 }

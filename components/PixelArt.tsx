@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 
 // Define the image URL from StartPage
@@ -31,32 +32,30 @@ const TEMPLATE_ART = [
     15 * 30 + 5, 16 * 30 + 4, 16 * 30 + 5, 16 * 30 + 6,
     17 * 30 + 3, 17 * 30 + 4, 17 * 30 + 5, 17 * 30 + 6, 17 * 30 + 7
   ], color: '#B10DC944' }
-]
+].flat()
 
 const GRID_SIZE = 30 // Fixed 30x30 grid
-const COLORS = [
-  '#FF4136', // Red
-  '#FF851B', // Orange
-  '#FFDC00', // Yellow
-  '#2ECC40', // Green
-  '#00BCD4', // Light Blue
-  '#0074D9', // Dark Blue
-  '#B10DC9', // Purple
-  '#FF69B4', // Pink
-  '#111111', // Black
-]
 
-interface PixelArtProps {
-  onComplete?: () => void
-}
-
-export function PixelArt({ onComplete }: PixelArtProps) {
+export default function PixelArtPage() {
+  const router = useRouter()
   const [pixels, setPixels] = useState<string[]>([])
   const [currentSessionPixels, setCurrentSessionPixels] = useState<number[]>([])
-  const [activeColor, setActiveColor] = useState(COLORS[0])
+  const [activeColor, setActiveColor] = useState('#FF4136')
   const [pixelsLeft, setPixelsLeft] = useState(5)
   const [showEndImage, setShowEndImage] = useState(false)
   const [countdown, setCountdown] = useState(3)
+
+  const COLORS = [
+    '#FF4136', // Red
+    '#FF851B', // Orange
+    '#FFDC00', // Yellow
+    '#2ECC40', // Green
+    '#00BCD4', // Light Blue
+    '#0074D9', // Dark Blue
+    '#B10DC9', // Purple
+    '#FF69B4', // Pink
+    '#111111', // Black
+  ]
 
   useEffect(() => {
     const totalPixels = GRID_SIZE * GRID_SIZE
@@ -92,12 +91,8 @@ export function PixelArt({ onComplete }: PixelArtProps) {
         if (prev <= 1) {
           clearInterval(timer)
           setTimeout(() => {
-            if (onComplete) {
-              onComplete()
-            } else {
-              // Fallback to redirect if no onComplete handler
-              window.location.href = '/'
-            }
+            // Reset everything and redirect to start
+            window.location.href = '/'
           }, 500)
           return 3
         }
@@ -119,7 +114,7 @@ export function PixelArt({ onComplete }: PixelArtProps) {
           <div className="relative w-full max-w-2xl mx-auto">
             <div className="absolute inset-0 bg-[#8CD6E8] rounded-full transform translate-y-1/4"></div>
             <img
-              src={TOMASH_IMAGE || "/placeholder.svg"}
+              src={TOMASH_IMAGE}
               alt="3D character mascot in yellow jacket"
               className="relative z-10 w-full h-auto"
             />

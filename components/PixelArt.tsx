@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from "@/components/ui/button"
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 
 // Define the image URL from StartPage
 const TOMASH_IMAGE = "https://i.ibb.co/rmc10Mt/ovodv-httpss-mj-run9g-LNTGXsh24-Happy-guy-standing-open-month-cd580a6c-5a38-44ca-9c27-3e549b9eee5b-0.png"
@@ -47,8 +48,6 @@ export default function PixelArtPage({ pixelsEarned }: PixelArtProps) {
   const [pixelsLeft, setPixelsLeft] = useState(pixelsEarned)
   const [showEndImage, setShowEndImage] = useState(false)
   const [countdown, setCountdown] = useState(3)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   const COLORS = [
     '#FF4136', // Red
@@ -62,64 +61,9 @@ export default function PixelArtPage({ pixelsEarned }: PixelArtProps) {
     '#111111', // Black
   ]
 
-  useEffect(() => {
-    const fetchSavedPixels = async () => {
-      try {
-        // First create base white grid
-        const totalPixels = GRID_SIZE * GRID_SIZE
-        const initialPixels = Array(totalPixels).fill('#FFFFFF')
-        
-        // Add template art with opacity
-        TEMPLATE_ART.forEach(item => {
-          item.positions.forEach(position => {
-            if (position < totalPixels) {
-              initialPixels[position] = item.color
-            }
-          })
-        })
-
-        // Fetch and add saved pixels from previous users
-        const response = await fetch("/api/pixels")
-        if (!response.ok) throw new Error("Failed to fetch pixels")
-        const data = await response.json()
-        
-        if (data.pixels && Array.isArray(data.pixels)) {
-          data.pixels.forEach((savedPixel: {index: number, color: string}) => {
-            // Override any template or white pixels with saved pixels
-            initialPixels[savedPixel.index] = savedPixel.color
-          })
-        }
-        
-        setPixels(initialPixels)
-      } catch (err) {
-        console.error("Error loading pixels:", err)
-      }
-    }
-
-    fetchSavedPixels()
-  }, [])
-
-  const handlePixelClick = (index: number) => {
-    if (pixelsLeft > 0 && !currentSessionPixels.includes(index)) {
-      const newPixels = [...pixels]
-      newPixels[index] = activeColor
-      setPixels(newPixels)
-      setCurrentSessionPixels([...currentSessionPixels, index])
-      setPixelsLeft(prev => {
-        const newPixelsLeft = prev - 1
-        // If this was the last pixel, automatically save
-        if (newPixelsLeft === 0) {
-          handleSave()
-        }
-        return newPixelsLeft
-      })
-    }
-  }
-
-  const handleSave = async () => {
+  // Memoize handleSave to use in dependencies
+  const handleSave = useCallback(async () => {
     try {
-      console.log('Saving pixels...', currentSessionPixels.length)
-      
       // Only save if there are pixels to save
       if (currentSessionPixels.length === 0) {
         setShowEndImage(true)
@@ -159,17 +103,69 @@ export default function PixelArtPage({ pixelsEarned }: PixelArtProps) {
       }, 1000)
     } catch (err) {
       console.error("Error saving pixels:", err)
-      // Still show end image even if save fails
       setShowEndImage(true)
     }
-  }
+  }, [currentSessionPixels, pixels])
+
+  const handlePixelClick = useCallback((index: number) => {
+    if (pixelsLeft > 0 && !currentSessionPixels.includes(index)) {
+      const newPixels = [...pixels]
+      newPixels[index] = activeColor
+      setPixels(newPixels)
+      setCurrentSessionPixels(prev => [...prev, index])
+      setPixelsLeft(prev => {
+        const newPixelsLeft = prev - 1
+        // If this was the last pixel, automatically save
+        if (newPixelsLeft === 0) {
+          handleSave()
+        }
+        return newPixelsLeft
+      })
+    }
+  }, [pixelsLeft, currentSessionPixels, pixels, activeColor, handleSave])
+
+  useEffect(() => {
+    const fetchSavedPixels = async () => {
+      try {
+        // First create base white grid
+        const totalPixels = GRID_SIZE * GRID_SIZE
+        const initialPixels = Array(totalPixels).fill('#FFFFFF')
+        
+        // Add template art with opacity
+        TEMPLATE_ART.forEach(item => {
+          item.positions.forEach(position => {
+            if (position < totalPixels) {
+              initialPixels[position] = item.color
+            }
+          })
+        })
+
+        // Fetch and add saved pixels from previous users
+        const response = await fetch("/api/pixels")
+        if (!response.ok) throw new Error("Failed to fetch pixels")
+        const data = await response.json()
+        
+        if (data.pixels && Array.isArray(data.pixels)) {
+          data.pixels.forEach((savedPixel: {index: number, color: string}) => {
+            initialPixels[savedPixel.index] = savedPixel.color
+          })
+        }
+        
+        setPixels(initialPixels)
+      } catch (err) {
+        console.error("Error loading pixels:", err)
+      }
+    }
+
+    fetchSavedPixels()
+  }, [])
 
   useEffect(() => {
     // Auto-save when pixels are depleted
     if (pixelsLeft === 0 && currentSessionPixels.length > 0 && !showEndImage) {
       handleSave()
     }
-  }, [pixelsLeft, currentSessionPixels.length, showEndImage])
+  }, [pixelsLeft, currentSessionPixels.length, showEndImage, handleSave])
 
   if (showEndImage) {
     return (
@@ -187,11 +183,14 @@ export default function PixelArtPage({ pixelsEarned }: PixelArtProps) {
             Returning to start in <span className="font-bold">{countdown}</span> seconds...
           </p>
 
-          <img
+          <Image
             src={TOMASH_IMAGE}
             alt="3D character mascot in yellow jacket"
+            width={500}
+            height={500}
             className="w-auto h-auto object-contain mx-auto"
             style={{ maxHeight: '60vh' }}
+            priority
           />
         </div>
       </div>

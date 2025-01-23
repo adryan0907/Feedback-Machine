@@ -35,6 +35,25 @@
       ],
       "pixelsEarned": 0,
       "timestamp": "2025-01-23T01:34:24.532Z"
+    },
+    {
+      "answers": [
+        "Balance both",
+        null
+      ],
+      "pixelsEarned": 1,
+      "timestamp": "2025-01-23T01:38:12.041Z"
+    },
+    {
+      "answers": [
+        "Balance both",
+        "Problem Solving",
+        "Fair",
+        "Industry Work",
+        "Average"
+      ],
+      "pixelsEarned": 5,
+      "timestamp": "2025-01-23T01:39:59.099Z"
     }
   ]
 }

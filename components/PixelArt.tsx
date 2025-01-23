@@ -37,14 +37,20 @@ const TEMPLATE_ART = [
 
 const GRID_SIZE = 40
 
-export default function PixelArtPage() {
+interface PixelArtProps {
+  pixelsEarned: number;
+}
+
+export default function PixelArtPage({ pixelsEarned }: PixelArtProps) {
   const router = useRouter()
   const [pixels, setPixels] = useState<string[]>([])
   const [currentSessionPixels, setCurrentSessionPixels] = useState<number[]>([])
   const [activeColor, setActiveColor] = useState('#FF4136')
-  const [pixelsLeft, setPixelsLeft] = useState(5)
+  const [pixelsLeft, setPixelsLeft] = useState(pixelsEarned)
   const [showEndImage, setShowEndImage] = useState(false)
   const [countdown, setCountdown] = useState(3)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const COLORS = [
     '#FF4136', // Red
@@ -101,12 +107,27 @@ export default function PixelArtPage() {
       newPixels[index] = activeColor
       setPixels(newPixels)
       setCurrentSessionPixels([...currentSessionPixels, index])
-      setPixelsLeft(prev => prev - 1)
+      setPixelsLeft(prev => {
+        const newPixelsLeft = prev - 1
+        // If this was the last pixel, automatically save
+        if (newPixelsLeft === 0) {
+          handleSave()
+        }
+        return newPixelsLeft
+      })
     }
   }
 
   const handleSave = async () => {
     try {
+      console.log('Saving pixels...', currentSessionPixels.length)
+      
+      // Only save if there are pixels to save
+      if (currentSessionPixels.length === 0) {
+        setShowEndImage(true)
+        return
+      }
+
       // Save only the new pixels from this session
       const pixelsToSave = currentSessionPixels.map(index => ({
         index,
@@ -140,8 +161,17 @@ export default function PixelArtPage() {
       }, 1000)
     } catch (err) {
       console.error("Error saving pixels:", err)
+      // Still show end image even if save fails
+      setShowEndImage(true)
     }
   }
+
+  useEffect(() => {
+    // Auto-save when pixels are depleted
+    if (pixelsLeft === 0 && currentSessionPixels.length > 0 && !showEndImage) {
+      handleSave()
+    }
+  }, [pixelsLeft, currentSessionPixels.length, showEndImage])
 
   if (showEndImage) {
     return (
@@ -171,18 +201,21 @@ export default function PixelArtPage() {
   }
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col py-4 px-8">
+    <div className="h-screen bg-gradient-to-b from-white to-gray-50 flex flex-col py-4 px-8">
       <div className={`h-full flex flex-col transition-opacity duration-500 ${showEndImage ? 'opacity-0' : 'opacity-100'}`}>
-        <div className="text-center mb-2">
-          <p className="text-lg text-gray-600">Join our growing collaborative artwork!</p>
-          <h1 className="text-3xl font-bold text-[#0047AB]">Paint and Create Together</h1>
-          <p className="text-sm text-gray-500">Add your unique perspective to our shared canvas</p>
-        </div>
+        <motion.div 
+          className="text-center mb-6"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
+          <h1 className="text-4xl font-bold text-[#0047AB] mb-2">Leave Your Creative Mark</h1>
+          <p className="text-lg text-gray-600">Add your pixels to our growing collaborative artwork</p>
+        </motion.div>
 
-        <div className="flex-1 bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+        <div className="flex-1 bg-white rounded-3xl shadow-xl p-6 flex flex-col">
           <div className="flex-1 flex justify-center items-center">
             <div 
-              className="grid gap-0 bg-white rounded-xl border border-gray-200"
+              className="grid gap-0 bg-white rounded-xl border border-gray-200 shadow-inner"
               style={{
                 gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
                 height: 'min(75vh, 1000px)',
@@ -208,16 +241,18 @@ export default function PixelArtPage() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-4 mt-4">
+          <div className="flex flex-col items-center gap-4 mt-6">
             <div className="flex gap-3 justify-center">
               {COLORS.map((color) => (
-                <button
+                <motion.button
                   key={color}
-                  className={`w-10 h-10 rounded-full transition-transform hover:scale-110 ${
-                    activeColor === color ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : ''
+                  className={`w-12 h-12 rounded-full transition-all duration-300 hover:scale-110 shadow-lg ${
+                    activeColor === color ? 'ring-4 ring-offset-2 ring-[#8CD6E8] scale-110' : ''
                   }`}
                   style={{ backgroundColor: color }}
                   onClick={() => setActiveColor(color)}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
                 />
               ))}
             </div>
@@ -227,10 +262,10 @@ export default function PixelArtPage() {
                 Pixels Left: <span className="text-[#0047AB] font-bold">{pixelsLeft}</span>
               </p>
               <Button 
-                className="bg-[#0047AB] hover:bg-[#003380] text-white px-8 py-2 text-lg"
+                className="bg-[#0047AB] hover:bg-[#003380] text-white px-8 py-2 text-lg shadow-md hover:shadow-lg transition-all"
                 onClick={handleSave}
               >
-                Save
+                Save Artwork
               </Button>
             </div>
           </div>
@@ -239,4 +274,5 @@ export default function PixelArtPage() {
     </div>
   )
 }
+
 

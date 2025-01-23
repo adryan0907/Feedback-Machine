@@ -34,15 +34,39 @@ export default function Home() {
       setPixelsEarned(prev => prev + 1)
       
       // Award 2 bonus pixels for questions beyond the first 5
-      if (currentQuestionIndex >= 5) {
+      if (currentQuestionIndex >= 4) {
         setPixelsEarned(prev => prev + 2)
       }
     }
     
-    // End questions after 10 questions or if user has answered at least 5 and chooses to skip
+    // End questions after 5 questions or if user has answered at least 3 and chooses to skip
     if (currentQuestionIndex + 1 >= TOTAL_QUESTIONS || 
-        (answer === 'skip' && currentQuestionIndex >= 4)) {
+        (answer === 'skip' && currentQuestionIndex >= 2)) {
       setQuestionsCompleted(true)
+      
+      // Save answers to backend
+      const saveAnswers = async () => {
+        try {
+          const response = await fetch('/api/answers', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              answers: [...answers, answer !== 'skip' ? answer : null],
+              pixelsEarned: pixelsEarned + (answer !== 'skip' ? 1 : 0) + (currentQuestionIndex >= 5 ? 2 : 0)
+            })
+          })
+          
+          if (!response.ok) {
+            console.error('Failed to save answers')
+          }
+        } catch (err) {
+          console.error('Error saving answers:', err)
+        }
+      }
+      
+      saveAnswers()
       
       // If user earned no pixels (skipped all questions), show end screen directly
       if (pixelsEarned === 0) {
@@ -61,7 +85,7 @@ export default function Home() {
         }, 1000)
       }
     }
-  }, [currentQuestionIndex, pixelsEarned])
+  }, [currentQuestionIndex, pixelsEarned, answers])
 
   if (showEndImage) {
     return (

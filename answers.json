@@ -1,0 +1,33 @@
+{
+  "answers": [
+    {
+      "answers": [
+        null
+      ],
+      "pixelsEarned": 0,
+      "timestamp": "2025-01-23T01:18:46.367Z"
+    },
+    {
+      "answers": [
+        "Enhance it",
+        "AI Skills",
+        "Good",
+        "Tech Labs",
+        "Very Well"
+      ],
+      "pixelsEarned": 5,
+      "timestamp": "2025-01-23T01:26:44.335Z"
+    },
+    {
+      "answers": [
+        "Balance both",
+        "Problem Solving",
+        "Fair",
+        "Projects",
+        null
+      ],
+      "pixelsEarned": 4,
+      "timestamp": "2025-01-23T01:27:16.493Z"
+    }
+  ]
+}

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { motion } from 'framer-motion'
 
@@ -42,7 +41,6 @@ interface PixelArtProps {
 }
 
 export default function PixelArtPage({ pixelsEarned }: PixelArtProps) {
-  const router = useRouter()
   const [pixels, setPixels] = useState<string[]>([])
   const [currentSessionPixels, setCurrentSessionPixels] = useState<number[]>([])
   const [activeColor, setActiveColor] = useState('#FF4136')

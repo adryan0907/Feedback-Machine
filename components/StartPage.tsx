@@ -4,16 +4,19 @@ import { Card } from "@/components/ui/card"
 import { ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 
+// Add the image URL
+const TOMASH_IMAGE = "https://i.ibb.co/rmc10Mt/ovodv-httpss-mj-run9g-LNTGXsh24-Happy-guy-standing-open-month-cd580a6c-5a38-44ca-9c27-3e549b9eee5b-0.png"
+
 interface StartPageProps {
   onStart: () => void
 }
 
 export function StartPage({ onStart }: StartPageProps) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 overflow-hidden">
-      <div className="relative w-full max-w-4xl mx-auto text-center">
+    <div className="h-screen flex flex-col items-center justify-center px-4">
+      <div className="w-full max-w-6xl mx-auto text-center space-y-8">
         <motion.h1 
-          className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight"
+          className="text-5xl lg:text-6xl font-bold leading-tight"
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ 
@@ -22,28 +25,34 @@ export function StartPage({ onStart }: StartPageProps) {
             stiffness: 50
           }}
         >
-          I'm <span className="text-[#8CD6E8]">Tomash</span>,
+          Join <span className="text-[#8CD6E8]">Tomash</span> in Creating
           <br />
-          Help me with your
-          <br />
-          answer
+          A Collaborative Masterpiece
         </motion.h1>
-        <div className="relative w-full max-w-2xl mx-auto mb-8">
+
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          Share your perspective through our interactive survey and contribute to our 
+          growing pixel art canvas. Every response shapes our understanding, and every 
+          pixel adds to our collective artwork.
+        </p>
+
+        <div className="relative w-full max-w-2xl mx-auto">
           <div className="absolute inset-0 bg-[#8CD6E8] rounded-full transform translate-y-1/4"></div>
           <img
-            src="https://i.ibb.co/rmc10Mt/ovodv-httpss-mj-run9g-LNTGXsh24-Happy-guy-standing-open-month-cd580a6c-5a38-44ca-9c27-3e549b9eee5b-0.png"
+            src={TOMASH_IMAGE}
             alt="3D character mascot in yellow jacket"
-            className="relative z-10 w-full h-auto"
+            className="relative z-10 w-full h-auto object-contain"
+            style={{ maxHeight: '500px' }}
           />
         </div>
 
-        <div className="flex flex-wrap justify-center gap-4 relative z-20">
+        <div className="relative z-20 mt-12">
           <Button
             onClick={onStart}
             size="lg"
             className="bg-white hover:bg-gray-100 text-black text-lg h-14 px-8 rounded-full transition-all duration-200 hover:scale-105"
           >
-            Begin <ArrowRight className="ml-2 h-5 w-5" />
+            Start Your Contribution <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
         </div>
       </div>

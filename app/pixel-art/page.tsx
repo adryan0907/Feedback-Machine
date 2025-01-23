@@ -57,6 +57,36 @@ const TEMPLATE_ART = [
     ],
     color: "#B10DC944",
   },
+  // Added more clouds
+  { positions: [4 * 30 + 15, 4 * 30 + 16, 4 * 30 + 17], color: "#00BCD444" },
+  // Added more trees
+  {
+    positions: [
+      20 * 30 + 22,
+      21 * 30 + 22,
+      22 * 30 + 22,
+      19 * 30 + 21,
+      19 * 30 + 22,
+      19 * 30 + 23,
+      18 * 30 + 22,
+    ],
+    color: "#2ECC4044",
+  },
+  // Added more mountains
+  {
+    positions: [
+      15 * 30 + 15,
+      16 * 30 + 14,
+      16 * 30 + 15,
+      16 * 30 + 16,
+      17 * 30 + 13,
+      17 * 30 + 14,
+      17 * 30 + 15,
+      17 * 30 + 16,
+      17 * 30 + 17,
+    ],
+    color: "#B10DC944",
+  },
 ].flat()
 
 const GRID_SIZE = 30 // Fixed 30x30 grid
@@ -66,7 +96,7 @@ export default function PixelArtPage() {
   const [pixels, setPixels] = useState<string[]>([])
   const [currentSessionPixels, setCurrentSessionPixels] = useState<number[]>([])
   const [activeColor, setActiveColor] = useState("#FF4136")
-  const [pixelsLeft, setPixelsLeft] = useState(5)
+  const [pixelsLeft, setPixelsLeft] = useState(10)
   const [showEndImage, setShowEndImage] = useState(false)
   const [countdown, setCountdown] = useState(3)
   const [isLoading, setIsLoading] = useState(true)
@@ -93,7 +123,27 @@ export default function PixelArtPage() {
           throw new Error("Failed to fetch pixels")
         }
         const data = await response.json()
-        initializePixels(data.pixels || null)
+        
+        const totalPixels = GRID_SIZE * GRID_SIZE
+        const initialPixels = Array(totalPixels).fill('#FFFFFF')
+        
+        // Add template art
+        TEMPLATE_ART.forEach(item => {
+          item.positions.forEach(position => {
+            if (position < totalPixels) {
+              initialPixels[position] = item.color
+            }
+          })
+        })
+        
+        // Add all previously saved pixels
+        if (data.pixels && Array.isArray(data.pixels)) {
+          data.pixels.forEach((savedPixel: {index: number, color: string}) => {
+            initialPixels[savedPixel.index] = savedPixel.color.replace('44', '') // Remove opacity
+          })
+        }
+        
+        setPixels(initialPixels)
       } catch (err) {
         console.error("Error fetching pixels:", err)
         setError("Failed to load saved artwork. Starting with a blank canvas.")
@@ -143,12 +193,18 @@ export default function PixelArtPage() {
 
   const handleSave = async () => {
     try {
+      // Save only the current session's pixels
+      const pixelsToSave = currentSessionPixels.map(index => ({
+        index,
+        color: pixels[index]
+      }))
+      
       const response = await fetch("/api/pixels", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ pixels }),
+        body: JSON.stringify({ pixels: pixelsToSave }),
       })
 
       if (!response.ok) {

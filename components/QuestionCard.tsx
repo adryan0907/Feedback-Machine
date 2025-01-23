@@ -25,19 +25,20 @@ export function QuestionCard({ question, options, onAnswer, currentQuestion, tot
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full mb-8">
         {options.map((option, index) => (
-          <motion.button
-            key={index}
+          <button
+            key={option}
             onClick={() => onAnswer(option)}
-            className="group relative overflow-hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="w-full p-6 text-center rounded-2xl bg-[#8CD6E8] text-black font-medium 
+              transform transition-all duration-300 ease-out
+              hover:scale-[1.02] hover:brightness-105 hover:shadow-[0_0_15px_rgba(140,214,232,0.5)]
+              active:scale-[0.98]
+              focus:outline-none focus:ring-0"
+            style={{
+              WebkitTapHighlightColor: 'transparent'
+            }}
           >
-            <div className="bg-[#8CD6E8] rounded-2xl p-6 transform transition-transform group-hover:scale-105">
-              
-              <p className="text-lg">{option}</p>
-            </div>
-          </motion.button>
+            <div className="text-xl">{option}</div>
+          </button>
         ))}
       </div>
 

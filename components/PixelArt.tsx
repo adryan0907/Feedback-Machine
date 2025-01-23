@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
+import { motion } from 'framer-motion'
 
 // Define the image URL from StartPage
 const TOMASH_IMAGE = "https://i.ibb.co/rmc10Mt/ovodv-httpss-mj-run9g-LNTGXsh24-Happy-guy-standing-open-month-cd580a6c-5a38-44ca-9c27-3e549b9eee5b-0.png"
@@ -10,31 +11,31 @@ const TOMASH_IMAGE = "https://i.ibb.co/rmc10Mt/ovodv-httpss-mj-run9g-LNTGXsh24-H
 // Define an inspiring pixel art template - a simple landscape
 const TEMPLATE_ART = [
   // Sun (yellow)
-  { positions: [2 * 30 + 3, 2 * 30 + 4, 3 * 30 + 3, 3 * 30 + 4], color: '#FFDC0044' },
+  { positions: [2 * 40 + 3, 2 * 40 + 4, 3 * 40 + 3, 3 * 40 + 4], color: '#FFDC0044' },
   // Clouds (light blue)
-  { positions: [2 * 30 + 10, 2 * 30 + 11, 2 * 30 + 12, 3 * 30 + 11], color: '#00BCD444' },
-  { positions: [3 * 30 + 20, 3 * 30 + 21, 3 * 30 + 22, 2 * 30 + 21], color: '#00BCD444' },
+  { positions: [2 * 40 + 10, 2 * 40 + 11, 2 * 40 + 12, 3 * 40 + 11], color: '#00BCD444' },
+  { positions: [3 * 40 + 20, 3 * 40 + 21, 3 * 40 + 22, 2 * 40 + 21], color: '#00BCD444' },
   // Trees (green)
   { positions: [
-    20 * 30 + 8, 21 * 30 + 8, 22 * 30 + 8, // trunk
-    19 * 30 + 7, 19 * 30 + 8, 19 * 30 + 9, // leaves
-    18 * 30 + 8
+    20 * 40 + 8, 21 * 40 + 8, 22 * 40 + 8, // trunk
+    19 * 40 + 7, 19 * 40 + 8, 19 * 40 + 9, // leaves
+    18 * 40 + 8
   ], color: '#2ECC4044' },
   { positions: [
-    20 * 30 + 15, 21 * 30 + 15, 22 * 30 + 15, // trunk
-    19 * 30 + 14, 19 * 30 + 15, 19 * 30 + 16, // leaves
-    18 * 30 + 15
+    20 * 40 + 15, 21 * 40 + 15, 22 * 40 + 15, // trunk
+    19 * 40 + 14, 19 * 40 + 15, 19 * 40 + 16, // leaves
+    18 * 40 + 15
   ], color: '#2ECC4044' },
   // Ground (darker green)
-  { positions: Array.from({ length: 30 }, (_, i) => 23 * 30 + i), color: '#2ECC4044' },
+  { positions: Array.from({ length: 40 }, (_, i) => 23 * 40 + i), color: '#2ECC4044' },
   // Mountains (purple)
   { positions: [
-    15 * 30 + 5, 16 * 30 + 4, 16 * 30 + 5, 16 * 30 + 6,
-    17 * 30 + 3, 17 * 30 + 4, 17 * 30 + 5, 17 * 30 + 6, 17 * 30 + 7
+    15 * 40 + 5, 16 * 40 + 4, 16 * 40 + 5, 16 * 40 + 6,
+    17 * 40 + 3, 17 * 40 + 4, 17 * 40 + 5, 17 * 40 + 6, 17 * 40 + 7
   ], color: '#B10DC944' }
 ].flat()
 
-const GRID_SIZE = 30 // Fixed 30x30 grid
+const GRID_SIZE = 40
 
 export default function PixelArtPage() {
   const router = useRouter()
@@ -58,18 +59,40 @@ export default function PixelArtPage() {
   ]
 
   useEffect(() => {
-    const totalPixels = GRID_SIZE * GRID_SIZE
-    const initialPixels = Array(totalPixels).fill('#FFFFFF')
-    
-    // Add the template art with 30% opacity
-    TEMPLATE_ART.forEach(item => {
-      item.positions.forEach(position => {
-        if (position < totalPixels) {
-          initialPixels[position] = item.color
+    const fetchSavedPixels = async () => {
+      try {
+        // First create base white grid
+        const totalPixels = GRID_SIZE * GRID_SIZE
+        const initialPixels = Array(totalPixels).fill('#FFFFFF')
+        
+        // Add template art with opacity
+        TEMPLATE_ART.forEach(item => {
+          item.positions.forEach(position => {
+            if (position < totalPixels) {
+              initialPixels[position] = item.color
+            }
+          })
+        })
+
+        // Fetch and add saved pixels from previous users
+        const response = await fetch("/api/pixels")
+        if (!response.ok) throw new Error("Failed to fetch pixels")
+        const data = await response.json()
+        
+        if (data.pixels && Array.isArray(data.pixels)) {
+          data.pixels.forEach((savedPixel: {index: number, color: string}) => {
+            // Override any template or white pixels with saved pixels
+            initialPixels[savedPixel.index] = savedPixel.color
+          })
         }
-      })
-    })
-    setPixels(initialPixels)
+        
+        setPixels(initialPixels)
+      } catch (err) {
+        console.error("Error loading pixels:", err)
+      }
+    }
+
+    fetchSavedPixels()
   }, [])
 
   const handlePixelClick = (index: number) => {
@@ -82,74 +105,96 @@ export default function PixelArtPage() {
     }
   }
 
-  const handleSave = () => {
-    setShowEndImage(true)
-    
-    // Start countdown with smooth transition
-    const timer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          clearInterval(timer)
-          setTimeout(() => {
-            // Reset everything and redirect to start
-            window.location.href = '/'
-          }, 500)
-          return 3
-        }
-        return prev - 1
+  const handleSave = async () => {
+    try {
+      // Save only the new pixels from this session
+      const pixelsToSave = currentSessionPixels.map(index => ({
+        index,
+        color: pixels[index]
+      }))
+      
+      const response = await fetch("/api/pixels", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pixels: pixelsToSave }),
       })
-    }, 1000)
+
+      if (!response.ok) throw new Error("Failed to save pixels")
+      
+      setShowEndImage(true)
+      
+      // Start countdown
+      const timer = setInterval(() => {
+        setCountdown(prev => {
+          if (prev <= 1) {
+            clearInterval(timer)
+            setTimeout(() => {
+              window.location.href = '/'
+            }, 500)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    } catch (err) {
+      console.error("Error saving pixels:", err)
+    }
   }
 
   if (showEndImage) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className={`text-center max-w-4xl mx-auto px-4 transition-opacity duration-500 ${showEndImage ? 'opacity-100' : 'opacity-0'}`}>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
-            Thank you for your <span className="text-[#8CD6E8]">art</span>!
-          </h1>
-          <p className="text-2xl text-gray-600 mb-8">
-            Returning to start in {countdown} seconds...
+      <div className="h-screen bg-gray-50 flex items-center justify-center">
+        <div className={`text-center transition-opacity duration-500 ${showEndImage ? 'opacity-100' : 'opacity-0'}`}>
+          <motion.h1 
+            className="text-5xl lg:text-6xl font-bold leading-tight mb-4"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+          >
+            Thank you for your <span className="text-[#8CD6E8]">contribution</span>!
+          </motion.h1>
+          
+          <p className="text-xl text-gray-600 mb-8">
+            Returning to start in <span className="font-bold">{countdown}</span> seconds...
           </p>
-          <div className="relative w-full max-w-2xl mx-auto">
-            <div className="absolute inset-0 bg-[#8CD6E8] rounded-full transform translate-y-1/4"></div>
-            <img
-              src={TOMASH_IMAGE}
-              alt="3D character mascot in yellow jacket"
-              className="relative z-10 w-full h-auto"
-            />
-          </div>
+
+          <img
+            src={TOMASH_IMAGE}
+            alt="3D character mascot in yellow jacket"
+            className="w-auto h-auto object-contain mx-auto"
+            style={{ maxHeight: '60vh' }}
+          />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className={`max-w-6xl mx-auto transition-opacity duration-500 ${showEndImage ? 'opacity-0' : 'opacity-100'}`}>
-        <div className="text-center mb-8">
-          <p className="text-xl text-gray-600 mb-6">Thank you for your participation!</p>
-          <h1 className="text-4xl font-bold text-[#0047AB] mb-2">Paint and Enjoy</h1>
-          <p className="text-gray-500">or destroy the image</p>
+    <div className="h-screen bg-gray-50 flex flex-col py-4 px-8">
+      <div className={`h-full flex flex-col transition-opacity duration-500 ${showEndImage ? 'opacity-0' : 'opacity-100'}`}>
+        <div className="text-center mb-2">
+          <p className="text-lg text-gray-600">Join our growing collaborative artwork!</p>
+          <h1 className="text-3xl font-bold text-[#0047AB]">Paint and Create Together</h1>
+          <p className="text-sm text-gray-500">Add your unique perspective to our shared canvas</p>
         </div>
-        
-        <div className="bg-white rounded-3xl shadow-lg p-8">
-          <div className="flex justify-center mb-8 overflow-auto">
+
+        <div className="flex-1 bg-white rounded-3xl shadow-lg p-6 flex flex-col">
+          <div className="flex-1 flex justify-center items-center">
             <div 
-              className="grid gap-0 bg-white rounded-xl border-2 border-gray-200 p-2"
+              className="grid gap-0 bg-white rounded-xl border border-gray-200"
               style={{
                 gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
-                width: 'min(90vw, 600px)',
-                height: 'auto',
-                aspectRatio: '1 / 1'
+                height: 'min(75vh, 1000px)',
+                aspectRatio: '1 / 1',
               }}
             >
               {pixels.map((color, index) => (
                 <button
                   key={index}
-                  className="w-full h-full transition-all duration-150 hover:brightness-90 rounded-sm"
+                  className="w-full h-full transition-all duration-150 hover:brightness-90"
                   style={{ 
-                    backgroundColor: color, 
+                    backgroundColor: color,
                     aspectRatio: '1 / 1',
                     padding: 0,
                     margin: 0,
@@ -163,13 +208,13 @@ export default function PixelArtPage() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center gap-8">
-            <div className="flex gap-4 justify-center flex-wrap">
+          <div className="flex flex-col items-center gap-4 mt-4">
+            <div className="flex gap-3 justify-center">
               {COLORS.map((color) => (
                 <button
                   key={color}
-                  className={`w-12 h-12 rounded-full transition-transform hover:scale-110 ${
-                    activeColor === color ? 'ring-4 ring-offset-2 ring-blue-500 scale-110' : ''
+                  className={`w-10 h-10 rounded-full transition-transform hover:scale-110 ${
+                    activeColor === color ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : ''
                   }`}
                   style={{ backgroundColor: color }}
                   onClick={() => setActiveColor(color)}
@@ -177,8 +222,8 @@ export default function PixelArtPage() {
               ))}
             </div>
 
-            <div className="flex items-center gap-8 flex-wrap justify-center">
-              <p className="text-xl font-medium">
+            <div className="flex items-center gap-6">
+              <p className="text-lg font-medium">
                 Pixels Left: <span className="text-[#0047AB] font-bold">{pixelsLeft}</span>
               </p>
               <Button 

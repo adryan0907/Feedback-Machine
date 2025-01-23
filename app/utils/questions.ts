@@ -5,6 +5,24 @@ export interface Question {
 
 export const questions: Question[] = [
   {
+    question: "How do you think technology will impact human creativity in the next decade?",
+    options: [
+      "Technology will enhance human creativity",
+      "Technology will limit human creativity",
+      "Technology and creativity will balance each other",
+      "Technology's impact will vary by creative field"
+    ]
+  },
+  {
+    question: "What do you believe is the most crucial skill universities should focus on developing in students for the future workforce?",
+    options: [
+      "Critical thinking and problem-solving",
+      "Digital literacy and tech adaptation",
+      "Emotional intelligence and collaboration",
+      "Innovation and entrepreneurial mindset"
+    ]
+  },
+  {
     question: "How would you rate your overall university experience so far?",
     options: ["Excellent", "Good", "Average", "Below Average", "Poor"]
   },
